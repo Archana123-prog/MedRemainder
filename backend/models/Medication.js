@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const medicationSchema = new mongoose.Schema({
-  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  clerkUserId: { type: String, required: true },
   name: { type: String, required: true, trim: true },
   genericName: { type: String },
   dosage: { type: String, required: true }, // e.g. "500mg"

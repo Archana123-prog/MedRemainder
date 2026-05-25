@@ -8,17 +8,17 @@ const { protect } = require('../middleware/auth');
 // GET dashboard summary
 router.get('/', protect, async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.userId;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
     const [totalMeds, activeMeds, todayLogs, weekStats] = await Promise.all([
-      Medication.countDocuments({ user: userId }),
-      Medication.countDocuments({ user: userId, isActive: true }),
-      Log.find({ user: userId, scheduledTime: { $gte: today, $lt: tomorrow } }).populate('medication'),
-      Log.find({ user: userId, scheduledTime: { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } })
+      Medication.countDocuments({ clerkUserId: userId }),
+      Medication.countDocuments({ clerkUserId: userId, isActive: true }),
+      Log.find({ clerkUserId: userId, scheduledTime: { $gte: today, $lt: tomorrow } }).populate('medication'),
+      Log.find({ clerkUserId: userId, scheduledTime: { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } })
     ]);
 
     const takenToday = todayLogs.filter(l => l.status === 'taken').length;
@@ -28,7 +28,7 @@ router.get('/', protect, async (req, res) => {
       : 0;
 
     // Low pill alerts
-    const lowPillMeds = await Medication.find({ user: userId, isActive: true, pillsRemaining: { $lt: 5, $ne: null } });
+    const lowPillMeds = await Medication.find({ clerkUserId: userId, isActive: true, pillsRemaining: { $lt: 5, $ne: null } });
 
     res.json({
       totalMeds, activeMeds, takenToday, pendingToday,

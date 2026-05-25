@@ -8,7 +8,7 @@ const { protect } = require('../middleware/auth');
 router.get('/', protect, async (req, res) => {
   try {
     const { startDate, endDate, medicationId } = req.query;
-    const filter = { user: req.user._id };
+    const filter = { clerkUserId: req.userId };
     if (medicationId) filter.medication = medicationId;
     if (startDate || endDate) {
       filter.scheduledTime = {};
@@ -25,7 +25,7 @@ router.get('/', protect, async (req, res) => {
 // POST log a dose
 router.post('/', protect, async (req, res) => {
   try {
-    const log = await Log.create({ ...req.body, user: req.user._id });
+    const log = await Log.create({ ...req.body, clerkUserId: req.userId });
     // If taken, decrement pill count
     if (req.body.status === 'taken' && req.body.medication) {
       await Medication.findByIdAndUpdate(
@@ -43,7 +43,7 @@ router.post('/', protect, async (req, res) => {
 router.patch('/:id', protect, async (req, res) => {
   try {
     const log = await Log.findOneAndUpdate(
-      { _id: req.params.id, user: req.user._id },
+      { _id: req.params.id, clerkUserId: req.userId },
       { ...req.body, takenAt: req.body.status === 'taken' ? new Date() : undefined },
       { new: true }
     ).populate('medication');
@@ -65,7 +65,7 @@ router.get('/stats', protect, async (req, res) => {
     const since = new Date();
     since.setDate(since.getDate() - parseInt(days));
 
-    const logs = await Log.find({ user: req.user._id, scheduledTime: { $gte: since } });
+    const logs = await Log.find({ clerkUserId: req.userId, scheduledTime: { $gte: since } });
     const total = logs.length;
     const taken = logs.filter(l => l.status === 'taken').length;
     const missed = logs.filter(l => l.status === 'missed').length;

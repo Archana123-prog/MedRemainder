@@ -1,8 +1,9 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useClerk, useUser } from '@clerk/clerk-react';
 import { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import toast from 'react-hot-toast';
+import useClerkToken from '../hooks/useClerkToken';
 
 const navItems = [
   { path: '/dashboard', icon: '🏠', label: 'Dashboard', desc: 'Overview & today' },
@@ -13,7 +14,9 @@ const navItems = [
 ];
 
 export default function Layout() {
-  const { user, logout } = useAuth();
+  useClerkToken();
+  const { signOut } = useClerk();
+  const { user } = useUser();
   const navigate = useNavigate();
   const sidebarRef = useRef(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -25,10 +28,9 @@ export default function Layout() {
     );
   }, []);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await signOut({ redirectUrl: '/' });
     toast.success('Logged out safely 👋');
-    navigate('/');
   };
 
   return (
@@ -58,12 +60,12 @@ export default function Layout() {
           <div className="flex items-center gap-3">
             <div className="avatar placeholder">
               <div className="w-9 rounded-full bg-primary/30 text-primary-content">
-                <span className="text-sm font-bold">{user?.name?.[0]?.toUpperCase()}</span>
+                <span className="text-sm font-bold">{user?.fullName?.[0]?.toUpperCase()}</span>
               </div>
             </div>
             <div className="min-w-0">
-              <p className="font-semibold text-sm truncate">{user?.name}</p>
-              <p className="text-xs text-base-content/40 truncate">{user?.email}</p>
+              <p className="font-semibold text-sm truncate">{user?.fullName}</p>
+              <p className="text-xs text-base-content/40 truncate">{user?.primaryEmailAddress?.emailAddress}</p>
             </div>
           </div>
         </div>

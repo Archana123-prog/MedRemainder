@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import toast from 'react-hot-toast';
-import { useAuth } from '../context/AuthContext';
+import { useUser } from '@clerk/clerk-react';
 
 const CONDITIONS = ['Diabetes', 'Hypertension', 'Heart Disease', 'Asthma', 'Arthritis', 'Depression', 'Anxiety', 'Thyroid', 'Kidney Disease', 'Cancer'];
 
 export default function Profile() {
-  const { user, updateProfile } = useAuth();
+  const { user } = useUser();
   const [form, setForm] = useState({ name: '', age: '', phone: '', conditions: [], reminderMethod: 'email', emergencyContact: { name: '', phone: '', relation: '' } });
   const [saving, setSaving] = useState(false);
   const pageRef = useRef(null);
@@ -14,7 +14,7 @@ export default function Profile() {
   useEffect(() => {
     if (user) {
       setForm({
-        name: user.name || '', age: user.age || '', phone: user.phone || '',
+        name: user.fullName || '', age: user.age || '', phone: user.phone || '',
         conditions: user.conditions || [], reminderMethod: user.reminderMethod || 'email',
         emergencyContact: user.emergencyContact || { name: '', phone: '', relation: '' }
       });
@@ -31,14 +31,7 @@ export default function Profile() {
 
   const handleSave = async (e) => {
     e.preventDefault();
-    if (!form.name) return toast.error('Name is required');
-    setSaving(true);
-    try {
-      await updateProfile(form);
-      toast.success('Profile updated! ✅');
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Update failed');
-    } finally { setSaving(false); }
+    toast.info('Profile details are managed through Clerk.');
   };
 
   return (
@@ -51,11 +44,11 @@ export default function Profile() {
       {/* Avatar */}
       <div className="glass rounded-2xl p-6 flex items-center gap-5">
         <div className="w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center text-3xl font-bold text-primary">
-          {user?.name?.[0]?.toUpperCase()}
+          {user?.fullName?.[0]?.toUpperCase()}
         </div>
         <div>
-          <p className="font-display font-bold text-lg text-base-content">{user?.name}</p>
-          <p className="text-base-content/50 text-sm">{user?.email}</p>
+          <p className="font-display font-bold text-lg text-base-content">{user?.fullName}</p>
+          <p className="text-base-content/50 text-sm">{user?.primaryEmailAddress?.emailAddress}</p>
           <p className="text-xs text-base-content/30 mt-1">Member since {new Date(user?.createdAt).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}</p>
         </div>
       </div>

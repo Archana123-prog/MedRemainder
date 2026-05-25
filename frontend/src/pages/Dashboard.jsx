@@ -3,7 +3,7 @@ import { gsap } from 'gsap';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import API from '../utils/api';
-import { useAuth } from '../context/AuthContext';
+import { useUser } from '@clerk/clerk-react';
 
 const StatCard = ({ icon, label, value, sub, color = 'primary' }) => (
   <div className={`glass rounded-2xl p-5 border border-${color}/20 hover:border-${color}/40 transition-all duration-300 stat-card`}>
@@ -15,7 +15,7 @@ const StatCard = ({ icon, label, value, sub, color = 'primary' }) => (
 );
 
 export default function Dashboard() {
-  const { user } = useAuth();
+  const { user } = useUser();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const pageRef = useRef(null);
@@ -70,7 +70,7 @@ export default function Dashboard() {
       {/* Header */}
       <div>
         <p className="text-base-content/50 text-sm">{getGreeting()},</p>
-        <h1 className="font-display font-bold text-3xl text-base-content">{user?.name} 👋</h1>
+        <h1 className="font-display font-bold text-3xl text-base-content">{user?.fullName} 👋</h1>
         <p className="text-base-content/40 text-sm mt-1">{new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
       </div>
 

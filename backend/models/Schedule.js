@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const scheduleSchema = new mongoose.Schema({
-  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  clerkUserId: { type: String, required: true },
   medication: { type: mongoose.Schema.Types.ObjectId, ref: 'Medication', required: true },
   frequency: {
     type: String,

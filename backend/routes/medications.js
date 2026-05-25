@@ -6,7 +6,7 @@ const { protect } = require('../middleware/auth');
 // GET all medications for user
 router.get('/', protect, async (req, res) => {
   try {
-    const meds = await Medication.find({ user: req.user._id }).sort({ createdAt: -1 });
+    const meds = await Medication.find({ clerkUserId: req.userId }).sort({ createdAt: -1 });
     res.json(meds);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -16,7 +16,7 @@ router.get('/', protect, async (req, res) => {
 // POST create medication
 router.post('/', protect, async (req, res) => {
   try {
-    const med = await Medication.create({ ...req.body, user: req.user._id });
+    const med = await Medication.create({ ...req.body, clerkUserId: req.userId });
     res.status(201).json(med);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -26,7 +26,7 @@ router.post('/', protect, async (req, res) => {
 // GET single medication
 router.get('/:id', protect, async (req, res) => {
   try {
-    const med = await Medication.findOne({ _id: req.params.id, user: req.user._id });
+    const med = await Medication.findOne({ _id: req.params.id, clerkUserId: req.userId });
     if (!med) return res.status(404).json({ message: 'Medication not found' });
     res.json(med);
   } catch (err) {
@@ -38,7 +38,7 @@ router.get('/:id', protect, async (req, res) => {
 router.put('/:id', protect, async (req, res) => {
   try {
     const med = await Medication.findOneAndUpdate(
-      { _id: req.params.id, user: req.user._id },
+      { _id: req.params.id, clerkUserId: req.userId },
       req.body, { new: true }
     );
     if (!med) return res.status(404).json({ message: 'Medication not found' });
@@ -51,7 +51,7 @@ router.put('/:id', protect, async (req, res) => {
 // DELETE medication
 router.delete('/:id', protect, async (req, res) => {
   try {
-    await Medication.findOneAndDelete({ _id: req.params.id, user: req.user._id });
+    await Medication.findOneAndDelete({ _id: req.params.id, clerkUserId: req.userId });
     res.json({ message: 'Medication deleted' });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -63,7 +63,7 @@ router.patch('/:id/pills', protect, async (req, res) => {
   try {
     const { pillsRemaining } = req.body;
     const med = await Medication.findOneAndUpdate(
-      { _id: req.params.id, user: req.user._id },
+      { _id: req.params.id, clerkUserId: req.userId },
       { pillsRemaining }, { new: true }
     );
     res.json(med);
